@@ -1,4 +1,4 @@
-#
+			#
 # Copyright (C) 2007-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -354,6 +354,7 @@ define Build/Patch
 	$(call PatchDir,$(PKG_BUILD_DIR),$(PATCH_DIR)/mwl,mwl/)
 	$(call PatchDir,$(PKG_BUILD_DIR),$(PATCH_DIR)/brcm,brcm/)
 	$(call PatchDir,$(PKG_BUILD_DIR),$(PATCH_DIR)/rtl,rtl/)
+	$(call PatchDir,$(PKG_BUILD_DIR),$(PATCH_DIR)/imdea,imdea/)
 	$(if $(QUILT),touch $(PKG_BUILD_DIR)/.quilt_used)
 endef
 
