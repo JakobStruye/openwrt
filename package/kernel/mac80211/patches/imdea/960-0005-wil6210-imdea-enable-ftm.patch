@@ -2466,9 +2466,9 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/wil6210.h b/drivers/net/wireless/a
  
  enum {
 @@ -851,6 +853,9 @@ struct wil6210_vif {
- 	int net_queue_stopped; /* netif_tx_stop_all_queues invoked */
- 	bool fw_stats_ready; /* per-cid statistics are ready inside sta_info */
- 	u64 fw_stats_tsf; /* measurement timestamp */
+	/* PTK rekey race prevention, this is relevant to station mode only */
+	enum wil_rekey_state ptk_rekey_state;
+	struct work_struct enable_tx_key_worker;
 +
 +	/* fine timing measurement */
 +	struct wil_ftm_priv ftm;
@@ -2477,8 +2477,8 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/wil6210.h b/drivers/net/wireless/a
  /**
 @@ -1022,6 +1027,17 @@ struct wil6210_priv {
  
- 	u32 max_agg_wsize;
- 	u32 max_ampdu_size;
+	u8 multicast_to_unicast;
+	s32 cqm_rssi_thold;
 +
 +	bool tt_data_set;
 +	struct wmi_tt_data tt_data;
@@ -2751,7 +2751,8 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/wmi.h b/drivers/net/wireless/ath/w
  	WMI_FW_CAPABILITY_LO_POWER_CALIB_FROM_OTP	= 14,
  	WMI_FW_CAPABILITY_PNO				= 15,
 +	WMI_FW_CAPABILITY_CONNECT_SNR_THR		= 16,
-+	WMI_FW_CAPABILITY_CHANNEL_BONDING		= 17,
++	
+ 	WMI_FW_CAPABILITY_CHANNEL_BONDING		= 17,
  	WMI_FW_CAPABILITY_REF_CLOCK_CONTROL		= 18,
  	WMI_FW_CAPABILITY_AP_SME_OFFLOAD_NONE		= 19,
  	WMI_FW_CAPABILITY_MULTI_VIFS			= 20,
