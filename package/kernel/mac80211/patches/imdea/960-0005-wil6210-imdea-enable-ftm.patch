@@ -132,14 +132,6 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
  	int rc = 0;
  	enum ieee80211_bss_type bss_type = IEEE80211_BSS_TYPE_ESS;
  
-+	// First the power profile
-+	enum wmi_ps_profile_type ps_profile;
-+	ps_profile = WMI_PS_PROFILE_TYPE_PS_DISABLED;
-+
-+	rc = wil_ps_update(wil, ps_profile);
-+
-+	//printk("WMI_PS_DEV_PROFILE_CFG_CMDID status: %d\n", rc);
-+
 +	// Now we need to do a UNIT test to calibrate Tx and Rx
 +	struct {
 +		__le16 module_id;
@@ -153,6 +145,14 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +		__le32 res;
 +		u8 reserved[92];
 +    } __packed reply_unit;
++
++	// First the power profile
++	enum wmi_ps_profile_type ps_profile;
++	ps_profile = WMI_PS_PROFILE_TYPE_PS_DISABLED;
++
++	rc = wil_ps_update(wil, ps_profile);
++
++	//printk("WMI_PS_DEV_PROFILE_CFG_CMDID status: %d\n", rc);
 +
 +    memset(&cmd_unit, 0, sizeof(cmd_unit));
 +    cmd_unit.module_id = 0xa;
@@ -284,136 +284,136 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +	return channel;
 +}
 +
-+static int wil_ftm_parse_meas_params(struct wil6210_priv *wil,
-+				     struct nlattr *attr,
-+				     struct wil_ftm_meas_params *params)
-+{
-+	//printk("wil_ftm_parse_meas_params\n");
++//static int wil_ftm_parse_meas_params(struct wil6210_priv *wil,
++//				     struct nlattr *attr,
++//				     struct wil_ftm_meas_params *params)
++//{
++//	//printk("wil_ftm_parse_meas_params\n");
++//
++//	struct nlattr *tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MAX + 1];
++//	int rc;
++//
++//	if (!attr) {
++//		/* temporary defaults for one-shot measurement */
++//		params->meas_per_burst = 1;
++//		params->burst_period = 5; /* 500 milliseconds */
++//		return 0;
++//	}
++//	rc = nla_parse_nested(tb, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MAX,
++//			      attr, wil_nl80211_ftm_meas_param_policy, NULL);
++//	if (rc) {
++//		wil_err(wil, "invalid measurement params\n");
++//		return rc;
++//	}
++//	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MEAS_PER_BURST])
++//		params->meas_per_burst = nla_get_u8(
++//			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MEAS_PER_BURST]);
++//	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_NUM_BURSTS_EXP])
++//		params->num_of_bursts_exp = nla_get_u8(
++//			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_NUM_BURSTS_EXP]);
++//	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_DURATION])
++//		params->burst_duration = nla_get_u8(
++//			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_DURATION]);
++//	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_PERIOD])
++//		params->burst_period = nla_get_u16(
++//			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_PERIOD]);
++//	return 0;
++//}
 +
-+	struct nlattr *tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MAX + 1];
-+	int rc;
++//static int wil_ftm_validate_meas_params(struct wil6210_priv *wil,
++//					struct wil_ftm_meas_params *params)
++//{
++//	//printk("wil_ftm_validate_meas_params\n");
++//
++//	/* temporary allow only single-burst */
++//	if (params->meas_per_burst > WIL_FTM_MAX_MEAS_PER_BURST ||
++//	    params->num_of_bursts_exp != 0) {
++//		wil_err(wil, "invalid measurement params\n");
++//		return -EINVAL;
++//	}
++//
++//	return 0;
++//}
 +
-+	if (!attr) {
-+		/* temporary defaults for one-shot measurement */
-+		params->meas_per_burst = 1;
-+		params->burst_period = 5; /* 500 milliseconds */
-+		return 0;
-+	}
-+	rc = nla_parse_nested(tb, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MAX,
-+			      attr, wil_nl80211_ftm_meas_param_policy, NULL);
-+	if (rc) {
-+		wil_err(wil, "invalid measurement params\n");
-+		return rc;
-+	}
-+	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MEAS_PER_BURST])
-+		params->meas_per_burst = nla_get_u8(
-+			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MEAS_PER_BURST]);
-+	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_NUM_BURSTS_EXP])
-+		params->num_of_bursts_exp = nla_get_u8(
-+			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_NUM_BURSTS_EXP]);
-+	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_DURATION])
-+		params->burst_duration = nla_get_u8(
-+			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_DURATION]);
-+	if (tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_PERIOD])
-+		params->burst_period = nla_get_u16(
-+			tb[QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_PERIOD]);
-+	return 0;
-+}
++//static int wil_ftm_append_meas_params(struct wil6210_priv *wil,
++//				      struct sk_buff *msg,
++//				      struct wil_ftm_meas_params *params)
++//{
++//	//printk("wil_ftm_append_meas_params\n");
++//
++//	struct nlattr *nl_p;
++//
++//	nl_p = nla_nest_start(
++//		msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_MEAS_PARAMS);
++//	if (!nl_p)
++//		goto out_put_failure;
++//	if (nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MEAS_PER_BURST,
++//		       params->meas_per_burst) ||
++//	    nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_NUM_BURSTS_EXP,
++//		       params->num_of_bursts_exp) ||
++//	    nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_DURATION,
++//		       params->burst_duration) ||
++//	    nla_put_u16(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_PERIOD,
++//			params->burst_period))
++//		goto out_put_failure;
++//	nla_nest_end(msg, nl_p);
++//	return 0;
++//out_put_failure:
++//	return -ENOBUFS;
++//}
 +
-+static int wil_ftm_validate_meas_params(struct wil6210_priv *wil,
-+					struct wil_ftm_meas_params *params)
-+{
-+	//printk("wil_ftm_validate_meas_params\n");
-+
-+	/* temporary allow only single-burst */
-+	if (params->meas_per_burst > WIL_FTM_MAX_MEAS_PER_BURST ||
-+	    params->num_of_bursts_exp != 0) {
-+		wil_err(wil, "invalid measurement params\n");
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static int wil_ftm_append_meas_params(struct wil6210_priv *wil,
-+				      struct sk_buff *msg,
-+				      struct wil_ftm_meas_params *params)
-+{
-+	//printk("wil_ftm_append_meas_params\n");
-+
-+	struct nlattr *nl_p;
-+
-+	nl_p = nla_nest_start(
-+		msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_MEAS_PARAMS);
-+	if (!nl_p)
-+		goto out_put_failure;
-+	if (nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_MEAS_PER_BURST,
-+		       params->meas_per_burst) ||
-+	    nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_NUM_BURSTS_EXP,
-+		       params->num_of_bursts_exp) ||
-+	    nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_DURATION,
-+		       params->burst_duration) ||
-+	    nla_put_u16(msg, QCA_WLAN_VENDOR_ATTR_FTM_PARAM_BURST_PERIOD,
-+			params->burst_period))
-+		goto out_put_failure;
-+	nla_nest_end(msg, nl_p);
-+	return 0;
-+out_put_failure:
-+	return -ENOBUFS;
-+}
-+
-+static int wil_ftm_append_peer_meas_res(struct wil6210_priv *wil,
-+					struct sk_buff *msg,
-+					struct wil_ftm_peer_meas_res *res)
-+{
-+	//printk("wil_ftm_append_peer_meas_res\n");
-+
-+	struct nlattr *nl_mres, *nl_f;
-+	int i;
-+
-+	if (nla_put(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_MAC_ADDR,
-+		    ETH_ALEN, res->mac_addr) ||
-+	    nla_put_u32(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_FLAGS,
-+			res->flags) ||
-+	    nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_STATUS,
-+		       res->status))
-+		goto out_put_failure;
-+	if (res->status == QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_STATUS_FAILED &&
-+	    nla_put_u8(msg,
-+		       QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_VALUE_SECONDS,
-+		       res->value_seconds))
-+		goto out_put_failure;
-+	if (res->has_params &&
-+	    wil_ftm_append_meas_params(wil, msg, &res->params))
-+		goto out_put_failure;
-+	nl_mres = nla_nest_start(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_MEAS);
-+	if (!nl_mres)
-+		goto out_put_failure;
-+	for (i = 0; i < res->n_meas; i++) {
-+		nl_f = nla_nest_start(msg, i);
-+		if (!nl_f)
-+			goto out_put_failure;
-+		if (nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T1,
-+				      res->meas[i].t1,
-+				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD) ||
-+		    nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T2,
-+				      res->meas[i].t2,
-+				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD) ||
-+		    nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T3,
-+				      res->meas[i].t3,
-+				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD) ||
-+		    nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T4,
-+				      res->meas[i].t4,
-+				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD))
-+			goto out_put_failure;
-+		nla_nest_end(msg, nl_f);
-+	}
-+	nla_nest_end(msg, nl_mres);
-+	return 0;
-+out_put_failure:
-+	wil_err(wil, "fail to append peer result\n");
-+	return -ENOBUFS;
-+}
++//static int wil_ftm_append_peer_meas_res(struct wil6210_priv *wil,
++//					struct sk_buff *msg,
++//					struct wil_ftm_peer_meas_res *res)
++//{
++//	//printk("wil_ftm_append_peer_meas_res\n");
++//
++//	struct nlattr *nl_mres, *nl_f;
++//	int i;
++//
++//	if (nla_put(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_MAC_ADDR,
++//		    ETH_ALEN, res->mac_addr) ||
++//	    nla_put_u32(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_FLAGS,
++//			res->flags) ||
++//	    nla_put_u8(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_STATUS,
++//		       res->status))
++//		goto out_put_failure;
++//	if (res->status == QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_STATUS_FAILED &&
++//	    nla_put_u8(msg,
++//		       QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_VALUE_SECONDS,
++//		       res->value_seconds))
++//		goto out_put_failure;
++//	if (res->has_params &&
++//	    wil_ftm_append_meas_params(wil, msg, &res->params))
++//		goto out_put_failure;
++//	nl_mres = nla_nest_start(msg, QCA_WLAN_VENDOR_ATTR_FTM_PEER_RES_MEAS);
++//	if (!nl_mres)
++//		goto out_put_failure;
++//	for (i = 0; i < res->n_meas; i++) {
++//		nl_f = nla_nest_start(msg, i);
++//		if (!nl_f)
++//			goto out_put_failure;
++//		if (nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T1,
++//				      res->meas[i].t1,
++//				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD) ||
++//		    nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T2,
++//				      res->meas[i].t2,
++//				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD) ||
++//		    nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T3,
++//				      res->meas[i].t3,
++//				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD) ||
++//		    nla_put_u64_64bit(msg, QCA_WLAN_VENDOR_ATTR_FTM_MEAS_T4,
++//				      res->meas[i].t4,
++//				      QCA_WLAN_VENDOR_ATTR_FTM_MEAS_PAD))
++//			goto out_put_failure;
++//		nla_nest_end(msg, nl_f);
++//	}
++//	nla_nest_end(msg, nl_mres);
++//	return 0;
++//out_put_failure:
++//	wil_err(wil, "fail to append peer result\n");
++//	return -ENOBUFS;
++//}
 +
 +//static void wil_ftm_send_meas_result(struct wil6210_vif *vif,
 +//				     struct wil_ftm_peer_meas_res *res)
@@ -828,6 +828,7 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +	u32 i, index;
 +	__le64 tmp = 0;
 +	u8 n_meas;
++	u64 t1, t2, t3, t4;
 +
 +
 +	mutex_lock(&vif->ftm.lock);
@@ -877,7 +878,6 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +		wil_info(wil, "[FTM] Falied measurement\n");
 +	}
 +
-+	u64 t1, t2, t3, t4;
 +
 +	for (i = 0; i < n_meas; i++) {
 +		index = vif->ftm.ftm_res->n_meas;
@@ -1211,7 +1211,7 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +	//}
 +//
 +	//rc = wil_ftm_cfg80211_start_session(vif, request);
-+out:
++//out:
 +	//kfree(request);
 +	kfree(manual_request);
 +	return rc;
@@ -1238,7 +1238,7 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +        struct wmi_aoa_meas_event evt;
 +    } __packed reply;
 +
-+    struct timeval tv;
++    //struct timeval tv;
 +
 +    u8 *meas_data;
 +
@@ -1273,17 +1273,17 @@ diff -rupN a/drivers/net/wireless/ath/wil6210/cfg80211.c b/drivers/net/wireless/
 +                  &reply, sizeof(reply),
 +                  500);
 +
-+    do_gettimeofday(&tv);
++    //do_gettimeofday(&tv);
 +
-+    printk(KERN_CONT "[AOA] Measurement: %d,%ld.%06ld,%pM,%u,%u,%d,%u,%u",
-+            rc,
-+            tv.tv_sec, tv.tv_usec,
-+            reply.evt.mac_addr,
-+            reply.evt.channel,
-+            reply.evt.aoa_meas_type,
-+            reply.evt.meas_rf_mask,
-+            reply.evt.meas_status,
-+            reply.evt.length);
++    //printk(KERN_CONT "[AOA] Measurement: %d,%ld.%06ld,%pM,%u,%u,%d,%u,%u",
++    //        rc,
++    //        0,0, //tv.tv_sec, tv.tv_usec,
++    //        reply.evt.mac_addr,
++    //        reply.evt.channel,
++    //        reply.evt.aoa_meas_type,
++    //        reply.evt.meas_rf_mask,
++    //        reply.evt.meas_status,
++    //        reply.evt.length);
 +
 +    meas_data = reply.evt.meas_data;
 +
